@@ -4,48 +4,86 @@ import 'package:monthly_expense_app/controllers/expense_controller.dart';
 import 'package:monthly_expense_app/models/expense.dart';
 import 'package:monthly_expense_app/widgets/expense_tile.dart';
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key, required this.controller});
 
   final ExpenseController controller;
 
   @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final currentMonthTotal = controller.totalForMonth(now);
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
 
-    if (currentMonthTotal == 0) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Reports will appear after you add expenses for this month.',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-      );
+class _ReportsScreenState extends State<ReportsScreen> {
+  late DateTime _selectedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _selectedMonth = DateTime(now.year, now.month);
+  }
+
+  Future<void> _pickReportMonth() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedMonth,
+      firstDate: DateTime(DateTime.now().year - 5),
+      lastDate: DateTime(DateTime.now().year + 1, 12, 31),
+      helpText: 'Select report month',
+    );
+
+    if (pickedDate == null) {
+      return;
     }
 
-    final previousMonthTotal = controller.totalForPreviousMonth(now);
+    setState(() {
+      _selectedMonth = DateTime(pickedDate.year, pickedDate.month);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final monthTotal = widget.controller.totalForMonth(_selectedMonth);
+    final previousMonth = DateTime(
+      _selectedMonth.year,
+      _selectedMonth.month - 1,
+    );
+    final previousMonthTotal = widget.controller.totalForMonth(previousMonth);
     final totalsByCategory =
-        controller
-            .totalsByCategoryForMonth(now)
+        widget.controller
+            .totalsByCategoryForMonth(_selectedMonth)
             .entries
             .where((entry) => entry.value > 0)
             .toList()
           ..sort((left, right) => right.value.compareTo(left.value));
     final currency = NumberFormat.currency(locale: 'en_PH', symbol: 'PHP ');
-    final topCategory = controller.topCategoryForMonth(now);
-    final delta = currentMonthTotal - previousMonthTotal;
+    final topCategory = widget.controller.topCategoryForMonth(_selectedMonth);
+    final delta = monthTotal - previousMonthTotal;
     final isHigherThanPreviousMonth = delta >= 0;
 
     return ListView(
       padding: const EdgeInsets.all(20),
       children: <Widget>[
         Text(
-          'Report for ${DateFormat.yMMMM().format(now)}',
+          'Report for ${DateFormat.yMMMM().format(_selectedMonth)}',
           style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Choose any month to review your spending summary and category breakdown.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 16),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.calendar_month_rounded),
+            title: const Text('Selected Month'),
+            subtitle: Text(DateFormat.yMMMM().format(_selectedMonth)),
+            trailing: TextButton(
+              onPressed: _pickReportMonth,
+              child: const Text('Change'),
+            ),
+          ),
         ),
         const SizedBox(height: 20),
         Card(
@@ -59,7 +97,7 @@ class ReportsScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 12),
-                Text('Current month: ${currency.format(currentMonthTotal)}'),
+                Text('Selected month: ${currency.format(monthTotal)}'),
                 const SizedBox(height: 6),
                 Text('Previous month: ${currency.format(previousMonthTotal)}'),
                 const SizedBox(height: 6),
@@ -91,33 +129,46 @@ class ReportsScreen extends StatelessWidget {
                 Text('Top category: ${topCategory?.label ?? 'None'}'),
                 const SizedBox(height: 6),
                 Text(
-                  'Average transaction: ${currency.format(controller.averageForMonth(now))}',
+                  'Average transaction: ${currency.format(widget.controller.averageForMonth(_selectedMonth))}',
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Transactions this month: ${controller.expenseCountForMonth(now)}',
+                  'Transactions this month: ${widget.controller.expenseCountForMonth(_selectedMonth)}',
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          'Category Breakdown',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 12),
-        ...totalsByCategory.map(
-          (entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _CategoryBreakdownTile(
-              category: entry.key,
-              value: entry.value,
-              total: currentMonthTotal,
-              currency: currency,
+        if (monthTotal == 0)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'No expenses found for ${DateFormat.yMMMM().format(_selectedMonth)}. '
+                'Choose another month or add more records.',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          )
+        else ...<Widget>[
+          Text(
+            'Category Breakdown',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          ...totalsByCategory.map(
+            (entry) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _CategoryBreakdownTile(
+                category: entry.key,
+                value: entry.value,
+                total: monthTotal,
+                currency: currency,
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

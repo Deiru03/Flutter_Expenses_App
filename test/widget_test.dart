@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:monthly_expense_app/controllers/expense_controller.dart';
 import 'package:monthly_expense_app/main.dart';
 import 'package:monthly_expense_app/models/expense.dart';
@@ -72,8 +73,74 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Summary for'), findsOneWidget);
-    expect(find.text('Category Breakdown'), findsOneWidget);
-    expect(find.text('Rent'), findsOneWidget);
+    expect(find.text('Total Spent'), findsOneWidget);
+    expect(find.text('Transactions'), findsOneWidget);
+  });
+
+  testWidgets('shows previous month summary on the dashboard', (
+    WidgetTester tester,
+  ) async {
+    final now = DateTime.now();
+    final previousMonthDate = DateTime(now.year, now.month - 1, 15);
+    final controller = ExpenseController(
+      storage: FakeExpenseStorage(
+        initialExpenses: <Expense>[
+          Expense(
+            id: '1',
+            title: 'Current Month Rent',
+            amount: 10000,
+            category: ExpenseCategory.rent,
+            date: now,
+            paymentMethod: PaymentMethod.bankTransfer,
+          ),
+          Expense(
+            id: '2',
+            title: 'Previous Month Groceries',
+            amount: 4200,
+            category: ExpenseCategory.groceries,
+            date: previousMonthDate,
+            paymentMethod: PaymentMethod.cash,
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Previous Month'), findsOneWidget);
+    expect(
+      find.text(DateFormat.yMMMM().format(previousMonthDate)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows a month picker on the reports tab', (
+    WidgetTester tester,
+  ) async {
+    final controller = ExpenseController(
+      storage: FakeExpenseStorage(
+        initialExpenses: <Expense>[
+          Expense(
+            id: '1',
+            title: 'Report Seed Expense',
+            amount: 1000,
+            category: ExpenseCategory.other,
+            date: DateTime.now(),
+            paymentMethod: PaymentMethod.cash,
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Reports'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Selected Month'), findsOneWidget);
+    expect(find.text('Change'), findsOneWidget);
   });
 
   testWidgets('opens expense actions and deletes the selected record', (

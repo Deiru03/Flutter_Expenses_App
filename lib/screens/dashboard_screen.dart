@@ -15,6 +15,10 @@ class DashboardScreen extends StatelessWidget {
     final currentMonthExpenses = controller.expensesForMonth(now);
     final totalsByCategory = controller.totalsByCategoryForMonth(now);
     final currency = NumberFormat.currency(locale: 'en_PH', symbol: 'PHP ');
+    final previousMonth = DateTime(now.year, now.month - 1);
+    final previousMonthTotal = controller.totalForMonth(previousMonth);
+    final currentMonthTotal = controller.totalForMonth(now);
+    final monthDifference = currentMonthTotal - previousMonthTotal;
 
     if (currentMonthExpenses.isEmpty) {
       return ListView(
@@ -46,6 +50,15 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          _PreviousMonthSummaryCard(
+            monthLabel: DateFormat.yMMMM().format(previousMonth),
+            value: currency.format(previousMonthTotal),
+            differenceLabel: previousMonthTotal == 0
+                ? 'No expenses recorded for the previous month yet.'
+                : 'This month is ${currency.format(monthDifference.abs())} '
+                      '${monthDifference >= 0 ? 'higher' : 'lower'} than last month.',
+          ),
         ],
       );
     }
@@ -68,7 +81,7 @@ class DashboardScreen extends StatelessWidget {
           children: <Widget>[
             _MetricCard(
               title: 'Total Spent',
-              value: currency.format(controller.totalForMonth(now)),
+              value: currency.format(currentMonthTotal),
               icon: Icons.payments_rounded,
             ),
             _MetricCard(
@@ -82,6 +95,16 @@ class DashboardScreen extends StatelessWidget {
               icon: Icons.insights_rounded,
             ),
           ],
+        ),
+        const SizedBox(height: 20),
+        _PreviousMonthSummaryCard(
+          monthLabel: DateFormat.yMMMM().format(previousMonth),
+          value: currency.format(previousMonthTotal),
+          differenceLabel: previousMonthTotal == 0
+              ? 'No expenses recorded for the previous month yet.'
+              : 'Compared with ${DateFormat.yMMMM().format(now)}, your spending is '
+                    '${currency.format(monthDifference.abs())} '
+                    '${monthDifference >= 0 ? 'higher' : 'lower'}.',
         ),
         const SizedBox(height: 24),
         Text(
@@ -112,6 +135,58 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PreviousMonthSummaryCard extends StatelessWidget {
+  const _PreviousMonthSummaryCard({
+    required this.monthLabel,
+    required this.value,
+    required this.differenceLabel,
+  });
+
+  final String monthLabel;
+  final String value;
+  final String differenceLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.history_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Previous Month',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(monthLabel, style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(differenceLabel),
+          ],
+        ),
+      ),
     );
   }
 }
