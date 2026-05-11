@@ -111,140 +111,134 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'Add Expense')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                _isEditing
-                    ? 'Update your expense details'
-                    : 'Record a monthly expense',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _isEditing
-                    ? 'Edit the selected record and save the updated values.'
-                    : 'Capture rent, groceries, bills, and other recurring costs.',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _titleController,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Expense title',
-                  hintText: 'Example: Apartment rent',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  hintText: '0.00',
-                  prefixText: 'PHP ',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  final parsedValue = double.tryParse(value ?? '');
-                  if (parsedValue == null || parsedValue <= 0) {
-                    return 'Please enter a valid amount.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<ExpenseCategory>(
-                initialValue: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                items: ExpenseCategory.values
-                    .map(
-                      (category) => DropdownMenuItem<ExpenseCategory>(
-                        value: category,
-                        child: Text(category.label),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (category) {
-                  if (category == null) {
-                    return;
-                  }
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<PaymentMethod>(
-                initialValue: _selectedPaymentMethod,
-                decoration: const InputDecoration(
-                  labelText: 'Payment Method',
-                  border: OutlineInputBorder(),
-                ),
-                items: PaymentMethod.values
-                    .map(
-                      (method) => DropdownMenuItem<PaymentMethod>(
-                        value: method,
-                        child: Text(method.label),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (method) {
-                  if (method == null) {
-                    return;
-                  }
-                  setState(() {
-                    _selectedPaymentMethod = method;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _pickDate,
-                borderRadius: BorderRadius.circular(12),
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Row(
+              _FormIntroCard(isEditing: _isEditing),
+              const SizedBox(height: 18),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Icon(Icons.calendar_month_rounded),
-                      const SizedBox(width: 12),
-                      Text(DateFormat.yMMMMd().format(_selectedDate)),
+                      TextFormField(
+                        controller: _titleController,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Expense title',
+                          hintText: 'Example: Apartment rent',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a title.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _amountController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          hintText: '0.00',
+                          prefixText: 'PHP ',
+                        ),
+                        validator: (value) {
+                          final parsedValue = double.tryParse(value ?? '');
+                          if (parsedValue == null || parsedValue <= 0) {
+                            return 'Please enter a valid amount.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<ExpenseCategory>(
+                        initialValue: _selectedCategory,
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                        ),
+                        items: ExpenseCategory.values
+                            .map(
+                              (category) => DropdownMenuItem<ExpenseCategory>(
+                                value: category,
+                                child: Text(category.label),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (category) {
+                          if (category == null) {
+                            return;
+                          }
+                          setState(() {
+                            _selectedCategory = category;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<PaymentMethod>(
+                        initialValue: _selectedPaymentMethod,
+                        decoration: const InputDecoration(
+                          labelText: 'Payment Method',
+                        ),
+                        items: PaymentMethod.values
+                            .map(
+                              (method) => DropdownMenuItem<PaymentMethod>(
+                                value: method,
+                                child: Text(method.label),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (method) {
+                          if (method == null) {
+                            return;
+                          }
+                          setState(() {
+                            _selectedPaymentMethod = method;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: _pickDate,
+                        borderRadius: BorderRadius.circular(20),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Date'),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.calendar_month_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(DateFormat.yMMMMd().format(_selectedDate)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _noteController,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: 'Notes (optional)',
+                          hintText:
+                              'Add details such as due date or account name',
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _noteController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  hintText: 'Add details such as due date or account name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
@@ -265,6 +259,65 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FormIntroCard extends StatelessWidget {
+  const _FormIntroCard({required this.isEditing});
+
+  final bool isEditing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(
+                isEditing ? Icons.edit_note_rounded : Icons.add_card_rounded,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    isEditing
+                        ? 'Update your expense details'
+                        : 'Record a monthly expense',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isEditing
+                        ? 'Edit the selected record and save the updated values.'
+                        : 'Capture rent, groceries, bills, and other recurring costs.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
