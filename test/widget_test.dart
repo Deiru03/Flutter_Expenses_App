@@ -1,30 +1,65 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:monthly_expense_app/controllers/expense_controller.dart';
 import 'package:monthly_expense_app/main.dart';
+import 'package:monthly_expense_app/models/expense.dart';
+import 'package:monthly_expense_app/services/expense_storage.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('shows the main expense tracker navigation', (
+    WidgetTester tester,
+  ) async {
+    final controller = ExpenseController(storage: FakeExpenseStorage());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Monthly Overview'), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Expenses'), findsOneWidget);
+    expect(find.text('Reports'), findsOneWidget);
+    expect(find.text('Add Expense'), findsOneWidget);
   });
+
+  testWidgets('loads saved expenses into the dashboard', (
+    WidgetTester tester,
+  ) async {
+    final fakeStorage = FakeExpenseStorage(
+      initialExpenses: <Expense>[
+        Expense(
+          id: '1',
+          title: 'Apartment Rent',
+          amount: 12500,
+          category: ExpenseCategory.rent,
+          date: DateTime.now(),
+          paymentMethod: PaymentMethod.bankTransfer,
+        ),
+      ],
+    );
+
+    final controller = ExpenseController(storage: fakeStorage);
+
+    await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Summary for'), findsOneWidget);
+    expect(find.text('Category Breakdown'), findsOneWidget);
+    expect(find.text('Rent'), findsOneWidget);
+  });
+}
+
+class FakeExpenseStorage implements ExpenseStorage {
+  FakeExpenseStorage({List<Expense>? initialExpenses})
+    : _expenses = List<Expense>.from(initialExpenses ?? const <Expense>[]);
+
+  List<Expense> _expenses;
+
+  @override
+  Future<List<Expense>> loadExpenses() async {
+    return List<Expense>.from(_expenses);
+  }
+
+  @override
+  Future<void> saveExpenses(List<Expense> expenses) async {
+    _expenses = List<Expense>.from(expenses);
+  }
 }
