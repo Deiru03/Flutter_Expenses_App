@@ -3,9 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:monthly_expense_app/models/expense.dart';
 
 class ExpenseTile extends StatelessWidget {
-  const ExpenseTile({super.key, required this.expense});
+  const ExpenseTile({
+    super.key, 
+    required this.expense,
+    this.onTap,
+  });
 
   final Expense expense;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +19,7 @@ class ExpenseTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
           backgroundColor: expenseColor(

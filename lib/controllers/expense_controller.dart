@@ -44,6 +44,18 @@ class ExpenseController extends ChangeNotifier {
     await _persist();
   }
 
+  Future<void> updateExpense(Expense updatedExpense) async {
+    _expenses = _expenses.map((expense) {
+      if (expense.id == updatedExpense.id) {
+        return updatedExpense;
+      }
+      return expense;
+    }).toList();
+    _sortExpenses();
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> deleteExpense(String expenseId) async {
     _expenses = _expenses.where((expense) => expense.id != expenseId).toList();
     notifyListeners();

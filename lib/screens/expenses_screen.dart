@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:monthly_expense_app/controllers/expense_controller.dart';
+import 'package:monthly_expense_app/models/expense.dart';
+import 'package:monthly_expense_app/screens/add_expense_screen.dart';
 import 'package:monthly_expense_app/widgets/expense_tile.dart';
 
 class ExpensesScreen extends StatelessWidget {
@@ -72,19 +74,91 @@ class ExpensesScreen extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
               ),
-              onDismissed: (_) {
-                controller.deleteExpense(expense.id);
+              onDismissed: (_) async {
+                await controller.deleteExpense(expense.id);
+                if (!context.mounted) {
+                  return;
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('${expense.title} removed')),
                 );
               },
-              child: ExpenseTile(expense: expense),
+              child: ExpenseTile(
+                expense: expense,
+                onTap: () {
+                  _showExpenseActions(context, controller, expense);
+                },
+              ),
             ),
           ),
         ),
       ],
     );
   }
+}
+
+Future<void> _showExpenseActions(
+  BuildContext parentContext,
+  ExpenseController controller,
+  Expense expense,
+) async {
+  await showModalBottomSheet<void>(
+    context: parentContext,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      final errorColor = Theme.of(sheetContext).colorScheme.error;
+
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  expense.title,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
+                subtitle: const Text(
+                  'Choose what you want to do with this expense record.',
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit_rounded),
+                title: const Text('Edit'),
+                subtitle: const Text('Open this expense in the form'),
+                onTap: () async {
+                  Navigator.of(sheetContext).pop();
+                  await Navigator.of(parentContext).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => AddExpenseScreen(
+                        controller: controller,
+                        existingExpense: expense,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete_outline_rounded, color: errorColor),
+                title: Text('Delete', style: TextStyle(color: errorColor)),
+                subtitle: const Text('Remove this expense permanently'),
+                onTap: () async {
+                  Navigator.of(sheetContext).pop();
+                  await controller.deleteExpense(expense.id);
+                  if (!parentContext.mounted) {
+                    return;
+                  }
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    SnackBar(content: Text('${expense.title} removed')),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _SummaryStat extends StatelessWidget {

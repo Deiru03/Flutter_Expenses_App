@@ -4,9 +4,14 @@ import 'package:monthly_expense_app/controllers/expense_controller.dart';
 import 'package:monthly_expense_app/models/expense.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key, required this.controller});
+  const AddExpenseScreen({
+    super.key,
+    required this.controller,
+    this.existingExpense,
+  });
 
   final ExpenseController controller;
+  final Expense? existingExpense;
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -22,6 +27,24 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   PaymentMethod _selectedPaymentMethod = PaymentMethod.cash;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existingExpense != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existingExpense = widget.existingExpense;
+    if (existingExpense == null) {
+      return;
+    }
+
+    _titleController.text = existingExpense.title;
+    _amountController.text = existingExpense.amount.toStringAsFixed(2);
+    _noteController.text = existingExpense.note ?? '';
+    _selectedCategory = existingExpense.category;
+    _selectedPaymentMethod = existingExpense.paymentMethod;
+    _selectedDate = existingExpense.date;
+  }
 
   @override
   void dispose() {
@@ -59,7 +82,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     final note = _noteController.text.trim();
     final expense = Expense(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id:
+          widget.existingExpense?.id ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
       title: _titleController.text.trim(),
       amount: double.parse(_amountController.text.trim()),
       category: _selectedCategory,
@@ -68,7 +93,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       note: note.isEmpty ? null : note,
     );
 
-    await widget.controller.addExpense(expense);
+    if (_isEditing) {
+      await widget.controller.updateExpense(expense);
+    } else {
+      await widget.controller.addExpense(expense);
+    }
 
     if (!mounted) {
       return;
@@ -80,7 +109,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Expense')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'Add Expense')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -89,12 +118,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Record a monthly expense',
+                _isEditing
+                    ? 'Update your expense details'
+                    : 'Record a monthly expense',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                'Capture rent, groceries, bills, and other recurring costs.',
+                _isEditing
+                    ? 'Edit the selected record and save the updated values.'
+                    : 'Capture rent, groceries, bills, and other recurring costs.',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 20),
@@ -223,7 +256,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
-                  label: Text(_isSaving ? 'Saving...' : 'Save Expense'),
+                  label: Text(
+                    _isSaving
+                        ? 'Saving...'
+                        : (_isEditing ? 'Save Changes' : 'Save Expense'),
+                  ),
                 ),
               ),
             ],
