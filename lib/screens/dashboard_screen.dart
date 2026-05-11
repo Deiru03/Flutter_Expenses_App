@@ -20,10 +20,7 @@ class DashboardScreen extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(20),
         children: <Widget>[
-          Text(
-            'Monthly Expense Tracker',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('BudgetBuddy', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
             'Track your rent, bills, groceries, and card payments in one place.',
@@ -58,10 +55,7 @@ class DashboardScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: <Widget>[
-        Text(
-          'Monthly Expense Tracker',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text('BudgetBuddy', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         Text(
           'Summary for ${DateFormat.yMMMM().format(now)}',

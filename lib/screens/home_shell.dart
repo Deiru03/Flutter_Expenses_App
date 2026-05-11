@@ -83,13 +83,13 @@ class _HomeShellState extends State<HomeShell> {
   String _titleForIndex(int index) {
     switch (index) {
       case 0:
-        return 'Monthly Overview';
+        return 'BudgetBuddy';
       case 1:
         return 'Expenses';
       case 2:
         return 'Reports';
       default:
-        return 'Monthly Expense Tracker';
+        return 'BudgetBuddy';
     }
   }
 }

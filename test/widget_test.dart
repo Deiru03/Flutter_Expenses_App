@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
     await tester.pumpAndSettle();
 
-    expect(find.text('Monthly Overview'), findsOneWidget);
+    expect(find.text('BudgetBuddy'), findsNWidgets(2));
     expect(find.text('Dashboard'), findsOneWidget);
     expect(find.text('Expenses'), findsOneWidget);
     expect(find.text('Reports'), findsOneWidget);
