@@ -62,26 +62,54 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final isHigherThanPreviousMonth = delta >= 0;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
       children: <Widget>[
-        Text(
-          'Report for ${DateFormat.yMMMM().format(_selectedMonth)}',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Choose any month to review your spending summary and category breakdown.',
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+        _ReportsHeader(selectedMonth: _selectedMonth),
         const SizedBox(height: 16),
         Card(
-          child: ListTile(
-            leading: const Icon(Icons.calendar_month_rounded),
-            title: const Text('Selected Month'),
-            subtitle: Text(DateFormat.yMMMM().format(_selectedMonth)),
-            trailing: TextButton(
-              onPressed: _pickReportMonth,
-              child: const Text('Change'),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.calendar_month_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Selected Month',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        DateFormat.yMMMM().format(_selectedMonth),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton.tonal(
+                  onPressed: _pickReportMonth,
+                  child: const Text('Change'),
+                ),
+              ],
             ),
           ),
         ),
@@ -94,7 +122,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: <Widget>[
                 Text(
                   'Month-over-month summary',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text('Selected month: ${currency.format(monthTotal)}'),
@@ -123,7 +153,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: <Widget>[
                 Text(
                   'Insights',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text('Top category: ${topCategory?.label ?? 'None'}'),
@@ -154,7 +186,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         else ...<Widget>[
           Text(
             'Category Breakdown',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           ...totalsByCategory.map(
@@ -169,6 +203,55 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _ReportsHeader extends StatelessWidget {
+  const _ReportsHeader({required this.selectedMonth});
+
+  final DateTime selectedMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.secondary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Icon(
+            Icons.analytics_rounded,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Monthly Analysis',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Analysis for ${DateFormat.yMMMM().format(selectedMonth)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -209,14 +292,16 @@ class _CategoryBreakdownTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     category.label,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Text(
                   currency.format(value),
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ],
             ),

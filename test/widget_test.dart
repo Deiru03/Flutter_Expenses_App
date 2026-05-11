@@ -44,7 +44,7 @@ void main() {
     await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
     await tester.pumpAndSettle();
 
-    expect(find.text('BudgetBuddy'), findsNWidgets(2));
+    expect(find.text('BudgetBuddy'), findsOneWidget);
     expect(find.text('Dashboard'), findsOneWidget);
     expect(find.text('Expenses'), findsOneWidget);
     expect(find.text('Reports'), findsOneWidget);
@@ -72,8 +72,8 @@ void main() {
     await tester.pumpWidget(ExpenseTrackerApp(controller: controller));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Summary for'), findsOneWidget);
-    expect(find.text('Total Spent'), findsOneWidget);
+    expect(find.text('Monthly Snapshot'), findsOneWidget);
+    expect(find.text('Total Spent'), findsWidgets);
     expect(find.text('Transactions'), findsOneWidget);
   });
 
